@@ -11,6 +11,7 @@ import { useState, useCallback } from "react";
 import { useParams, useLocation } from "wouter";
 import { STAGES } from "@/lib/courseData";
 import { getStageSession, setStageSession } from "@/lib/stageSession";
+import { SpeakButton } from "@/components/SpeakButton";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft, ChevronRight, RotateCcw, CheckCircle2,
@@ -321,7 +322,11 @@ export default function FlashcardPage() {
                     {/* Student EN */}
                     <div className="mb-4 p-4 rounded-2xl"
                       style={{ background: "oklch(1 0 0 / 5%)" }}>
-                      <p className="text-xs font-bold text-white/40 mb-2">Student says</p>
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-xs font-bold text-white/40">Student says</p>
+                        <SpeakButton text={currentSentence.studentEN}
+                          className="text-white/50 hover:text-white p-1" />
+                      </div>
                       <p className="text-base font-semibold text-white leading-relaxed">
                         "{currentSentence.studentEN}"
                       </p>
@@ -330,9 +335,13 @@ export default function FlashcardPage() {
                     {/* Professor EN */}
                     <div className="flex-1 p-4 rounded-2xl"
                       style={{ background: "oklch(0.82 0.22 130 / 12%)", border: "1px solid oklch(0.82 0.22 130 / 25%)" }}>
-                      <p className="text-xs font-bold mb-2" style={{ color: "oklch(0.82 0.22 130)" }}>
-                        Professor responds
-                      </p>
+                      <div className="flex items-center justify-between mb-2">
+                        <p className="text-xs font-bold" style={{ color: "oklch(0.82 0.22 130)" }}>
+                          Professor responds
+                        </p>
+                        <SpeakButton text={currentSentence.professorEN}
+                          className="text-[oklch(0.82_0.22_130)] hover:text-white p-1" />
+                      </div>
                       <p className="text-sm leading-relaxed" style={{ color: "oklch(0.9 0.01 240)" }}>
                         {currentSentence.professorEN}
                       </p>
