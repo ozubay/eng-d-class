@@ -50,7 +50,7 @@ function initStageProgress(stageId: number): StageProgress {
   });
   return {
     stageId,
-    unlocked: stageId === 1,
+    unlocked: true, // 모든 스테이지 항상 도전 가능 (순차 잠금 없음)
     completed: false,
     sentences,
     quizzesPassed: 0,
@@ -86,6 +86,8 @@ function loadProgress(): UserProgress {
         if (!parsed.stages[s.id]) {
           parsed.stages[s.id] = initStageProgress(s.id);
         }
+        // Migration: 모든 스테이지 잠금 해제 (순차 잠금 폐지)
+        parsed.stages[s.id].unlocked = true;
       });
       // Ensure new fields exist for backward compat
       if (!parsed.wrongSentenceIds) parsed.wrongSentenceIds = [];

@@ -10,13 +10,14 @@
 
 import { useProgress } from "@/hooks/useProgress";
 import { STAGES } from "@/lib/courseData";
+import { getStageSession, stepLabel } from "@/lib/stageSession";
 import { Sidebar } from "@/components/Sidebar";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import {
   BookOpen, Zap, Flame, ChevronRight,
   Lock, CheckCircle2, Star, Target,
-  Sparkles, AlertTriangle, RotateCcw
+  Sparkles, AlertTriangle, RotateCcw, PlayCircle
 } from "lucide-react";
 
 const STAGE_COLORS: Record<string, { bg: string; text: string; border: string; glow: string }> = {
@@ -37,7 +38,6 @@ export default function Dashboard() {
   const overall = getOverallProgress();
 
   const completedStages = STAGES.filter(s => progress.stages[s.id]?.completed).length;
-  const unlockedStages = STAGES.filter(s => progress.stages[s.id]?.unlocked).length;
 
   return (
     <div className="min-h-screen flex" style={{ background: "oklch(0.968 0.003 240)" }}>
@@ -59,26 +59,19 @@ export default function Dashboard() {
             <span className="text-white/50 text-sm">Your Progress</span>
             <span className="text-white/30">·</span>
             <span className="text-sm font-semibold" style={{ color: "oklch(0.82 0.22 130)" }}>
-              Stage {Math.max(1, unlockedStages)} / {STAGES.length}
+              완료 {completedStages} / {STAGES.length}
             </span>
           </div>
 
           {/* Progress timeline */}
           <div className="flex-1 flex items-center gap-1 overflow-hidden">
-            {STAGES.map((stage, i) => {
-              const sp = progress.stages[stage.id];
-              const isCompleted = sp?.completed;
-              const isUnlocked = sp?.unlocked;
-              const isCurrent = isUnlocked && !isCompleted;
+            {STAGES.map((stage) => {
+              const isCompleted = progress.stages[stage.id]?.completed;
               return (
                 <div
                   key={stage.id}
                   className={`h-1.5 flex-1 rounded-full transition-all duration-500 ${
-                    isCompleted
-                      ? "bg-[oklch(0.82_0.22_130)]"
-                      : isCurrent
-                      ? "bg-[oklch(0.82_0.22_130/50%)]"
-                      : "bg-white/10"
+                    isCompleted ? "bg-[oklch(0.82_0.22_130)]" : "bg-white/10"
                   }`}
                 />
               );
@@ -152,41 +145,8 @@ export default function Dashboard() {
             </div>
           </motion.div>
 
-          {/* ── Mission Objectives ── */}
-          <motion.div
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1], delay: 0.08 }}
-            className="mb-8"
-          >
-            <div className="flex items-center gap-2 mb-4">
-              <Target size={16} className="text-muted-foreground" />
-              <h2 className="text-base font-bold text-foreground" style={{ fontFamily: "'DM Sans', sans-serif" }}>
-                훈련 목표
-              </h2>
-              <span className="filter-chip active ml-1">10 Missions</span>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {[
-                { icon: "⚡", title: "시각 언어 구사", desc: "contrast, hierarchy, scale 등 핵심 용어를 영어로 자연스럽게 표현" },
-                { icon: "💬", title: "크리틱 진행", desc: "학생 작업에 대해 구체적이고 전문적인 영어 피드백 제공" },
-                { icon: "🎯", title: "개념-형식 연결", desc: "디자인 개념과 시각 형식의 관계를 영어로 논리적으로 설명" },
-              ].map((obj, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, y: 12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.1 + i * 0.05, duration: 0.35, ease: [0.23, 1, 0.32, 1] }}
-                  className="bg-card rounded-2xl p-4 border border-border shadow-sm card-hover"
-                >
-                  <div className="text-2xl mb-2">{obj.icon}</div>
-                  <div className="font-semibold text-sm text-foreground mb-1">{obj.title}</div>
-                  <div className="text-xs text-muted-foreground leading-relaxed">{obj.desc}</div>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
+          {/* ── Continue / Start CTA ── */}
+          <ContinueCard progress={progress} />
 
           {/* ── Stage Grid ── */}
           <div className="flex items-center gap-2 mb-4">
@@ -240,6 +200,9 @@ export default function Dashboard() {
           {/* ── Wrong Note Card ── */}
           <WrongNoteCard progress={progress} />
 
+          {/* ── Mission Objectives (orientation) ── */}
+          <MissionObjectives />
+
           {/* ── Bottom Tip ── */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -250,7 +213,7 @@ export default function Dashboard() {
             <p className="text-xs text-muted-foreground">
               <BookOpen size={12} className="inline mr-1 mb-0.5" />
               각 스테이지는 <strong>빈칸 채우기 · 객관식 · 주관식 · 한→영 · 영→한</strong> 5가지 방식으로 반복 학습됩니다.
-              80% 이상 숙련 시 다음 스테이지가 잠금 해제됩니다.
+              모든 스테이지를 언제든 자유롭게 도전할 수 있고, 80% 이상 숙련 시 '완료'로 표시됩니다.
             </p>
           </motion.div>
         </main>
@@ -260,6 +223,94 @@ export default function Dashboard() {
 }
 
 // ── Sub-components ──
+
+// Primary call-to-action: resume the most recently interrupted stage,
+// else start the first incomplete stage, else suggest review.
+function ContinueCard({ progress }: { progress: ReturnType<typeof useProgress>["progress"] }) {
+  let best: { stage: typeof STAGES[number]; session: NonNullable<ReturnType<typeof getStageSession>> } | null = null;
+  for (const s of STAGES) {
+    const sess = getStageSession(s.id);
+    if (sess && (!best || sess.updatedAt > best.session.updatedAt)) best = { stage: s, session: sess };
+  }
+  const firstIncomplete = STAGES.find(s => !progress.stages[s.id]?.completed);
+
+  let href: string, cta: string, title: string, subtitle: string;
+  if (best) {
+    href = `/stage/${best.stage.id}/${best.session.step}`;
+    cta = "이어서 학습하기";
+    title = best.stage.title;
+    subtitle = `중단한 지점 · ${stepLabel(best.session.step)}`;
+  } else if (firstIncomplete) {
+    href = `/stage/${firstIncomplete.id}`;
+    cta = "학습 시작하기";
+    title = firstIncomplete.title;
+    subtitle = firstIncomplete.titleKR;
+  } else {
+    href = "/stage/1";
+    cta = "복습 시작하기";
+    title = "모든 스테이지 완료!";
+    subtitle = "복습으로 실력을 유지하세요";
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 16 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1], delay: 0.06 }}
+      className="mb-8"
+    >
+      <Link href={href}>
+        <div
+          className="rounded-3xl p-5 sm:p-6 flex items-center gap-4 cursor-pointer btn-press"
+          style={{ background: "oklch(0.82 0.22 130)", boxShadow: "0 10px 30px oklch(0.82 0.22 130 / 30%)" }}
+        >
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
+            style={{ background: "oklch(0.10 0.01 240 / 12%)" }}>
+            <PlayCircle size={26} className="text-[#1a2e00]" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-xs font-bold text-[#1a2e00]/70">{cta}</p>
+            <h2 className="text-lg sm:text-xl font-bold text-[#1a2e00] truncate"
+              style={{ fontFamily: "'DM Sans', sans-serif" }}>
+              {title}
+            </h2>
+            <p className="text-xs text-[#1a2e00]/70 truncate">{subtitle}</p>
+          </div>
+          <ChevronRight size={22} className="text-[#1a2e00] flex-shrink-0" />
+        </div>
+      </Link>
+    </motion.div>
+  );
+}
+
+// Orientation: what this platform trains. Moved below the actionable
+// content so the primary learning flow surfaces first.
+function MissionObjectives() {
+  const objectives = [
+    { icon: "⚡", title: "시각 언어 구사", desc: "contrast, hierarchy, scale 등 핵심 용어를 영어로 자연스럽게 표현" },
+    { icon: "💬", title: "크리틱 진행", desc: "학생 작업에 대해 구체적이고 전문적인 영어 피드백 제공" },
+    { icon: "🎯", title: "개념-형식 연결", desc: "디자인 개념과 시각 형식의 관계를 영어로 논리적으로 설명" },
+  ];
+  return (
+    <div className="mt-8">
+      <div className="flex items-center gap-2 mb-4">
+        <Target size={16} className="text-muted-foreground" />
+        <h2 className="text-base font-bold text-foreground" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+          이 플랫폼이 훈련하는 것
+        </h2>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {objectives.map((obj) => (
+          <div key={obj.title} className="bg-card rounded-2xl p-4 border border-border shadow-sm">
+            <div className="text-2xl mb-2">{obj.icon}</div>
+            <div className="font-semibold text-sm text-foreground mb-1">{obj.title}</div>
+            <div className="text-xs text-muted-foreground leading-relaxed">{obj.desc}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function StatBadge({ icon, label, value, color }: {
   icon: React.ReactNode; label: string; value: string; color: string;

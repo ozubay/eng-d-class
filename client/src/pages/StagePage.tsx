@@ -123,7 +123,7 @@ export default function StagePage() {
               />
             </div>
             <p className="text-xs text-muted-foreground mt-1.5">
-              80% 이상 달성 시 다음 스테이지 잠금 해제
+              80% 이상 달성 시 이 스테이지가 '완료'로 표시됩니다
             </p>
           </div>
         </motion.div>
