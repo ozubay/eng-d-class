@@ -1,0 +1,346 @@
+/* ============================================================
+   DESIGN SYSTEM: Neo-Minimal Workspace
+   Reference: HubSpot-style CRM dashboard aesthetic
+   Primary Accent: Lime Green (#A8E63D / oklch(0.82 0.22 130))
+   Base: Off-white background + pure white cards + dark sidebar
+   Typography: DM Sans (headings) + Noto Sans KR (body)
+   ============================================================ */
+
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+:root {
+  /* Lime Green Primary Accent */
+  --primary: oklch(0.82 0.22 130);
+  --primary-foreground: oklch(0.12 0.02 130);
+
+  /* Radius */
+  --radius: 0.75rem;
+
+  /* Background: warm off-white */
+  --background: oklch(0.968 0.003 240);
+  --foreground: oklch(0.12 0.01 240);
+
+  /* Cards: pure white */
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.12 0.01 240);
+
+  /* Popover */
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.12 0.01 240);
+
+  /* Secondary: subtle gray */
+  --secondary: oklch(0.93 0.005 240);
+  --secondary-foreground: oklch(0.35 0.01 240);
+
+  /* Muted */
+  --muted: oklch(0.95 0.003 240);
+  --muted-foreground: oklch(0.55 0.012 240);
+
+  /* Accent: same as primary */
+  --accent: oklch(0.82 0.22 130);
+  --accent-foreground: oklch(0.12 0.02 130);
+
+  /* Destructive: red */
+  --destructive: oklch(0.58 0.24 27);
+  --destructive-foreground: oklch(0.98 0 0);
+
+  /* Borders */
+  --border: oklch(0.90 0.004 240);
+  --input: oklch(0.90 0.004 240);
+  --ring: oklch(0.82 0.22 130);
+
+  /* Charts */
+  --chart-1: oklch(0.82 0.22 130);
+  --chart-2: oklch(0.65 0.18 200);
+  --chart-3: oklch(0.55 0.20 260);
+  --chart-4: oklch(0.70 0.20 50);
+  --chart-5: oklch(0.60 0.22 320);
+
+  /* Dark Sidebar */
+  --sidebar: oklch(0.10 0.01 240);
+  --sidebar-foreground: oklch(0.85 0.005 240);
+  --sidebar-primary: oklch(0.82 0.22 130);
+  --sidebar-primary-foreground: oklch(0.12 0.02 130);
+  --sidebar-accent: oklch(0.18 0.01 240);
+  --sidebar-accent-foreground: oklch(0.92 0.005 240);
+  --sidebar-border: oklch(1 0 0 / 8%);
+  --sidebar-ring: oklch(0.82 0.22 130);
+}
+
+.dark {
+  --primary: oklch(0.82 0.22 130);
+  --primary-foreground: oklch(0.12 0.02 130);
+  --background: oklch(0.12 0.01 240);
+  --foreground: oklch(0.92 0.005 240);
+  --card: oklch(0.16 0.008 240);
+  --card-foreground: oklch(0.92 0.005 240);
+  --popover: oklch(0.16 0.008 240);
+  --popover-foreground: oklch(0.92 0.005 240);
+  --secondary: oklch(0.22 0.008 240);
+  --secondary-foreground: oklch(0.75 0.005 240);
+  --muted: oklch(0.20 0.006 240);
+  --muted-foreground: oklch(0.60 0.012 240);
+  --accent: oklch(0.82 0.22 130);
+  --accent-foreground: oklch(0.12 0.02 130);
+  --destructive: oklch(0.65 0.22 27);
+  --destructive-foreground: oklch(0.98 0 0);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 12%);
+  --ring: oklch(0.82 0.22 130);
+  --chart-1: oklch(0.82 0.22 130);
+  --chart-2: oklch(0.65 0.18 200);
+  --chart-3: oklch(0.55 0.20 260);
+  --chart-4: oklch(0.70 0.20 50);
+  --chart-5: oklch(0.60 0.22 320);
+  --sidebar: oklch(0.08 0.008 240);
+  --sidebar-foreground: oklch(0.85 0.005 240);
+  --sidebar-primary: oklch(0.82 0.22 130);
+  --sidebar-primary-foreground: oklch(0.12 0.02 130);
+  --sidebar-accent: oklch(0.15 0.01 240);
+  --sidebar-accent-foreground: oklch(0.92 0.005 240);
+  --sidebar-border: oklch(1 0 0 / 6%);
+  --sidebar-ring: oklch(0.82 0.22 130);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Noto Sans KR', 'DM Sans', sans-serif;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'DM Sans', 'Noto Sans KR', sans-serif;
+  }
+  button:not(:disabled),
+  [role="button"]:not([aria-disabled="true"]),
+  [type="button"]:not(:disabled),
+  [type="submit"]:not(:disabled),
+  [type="reset"]:not(:disabled),
+  a[href],
+  select:not(:disabled),
+  input[type="checkbox"]:not(:disabled),
+  input[type="radio"]:not(:disabled) {
+    @apply cursor-pointer;
+  }
+}
+
+@layer components {
+  .container {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+
+  .flex {
+    min-height: 0;
+    min-width: 0;
+  }
+
+  @media (min-width: 640px) {
+    .container {
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .container {
+      padding-left: 2rem;
+      padding-right: 2rem;
+      max-width: 1280px;
+    }
+  }
+
+  /* === CUSTOM DESIGN SYSTEM COMPONENTS === */
+
+  /* Card hover lift */
+  .card-hover {
+    transition: transform 180ms cubic-bezier(0.23, 1, 0.32, 1),
+                box-shadow 180ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  .card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px oklch(0 0 0 / 10%);
+  }
+
+  /* Active card (lime green fill) */
+  .card-active {
+    background: oklch(0.82 0.22 130);
+    color: oklch(0.12 0.02 130);
+    box-shadow: 0 8px 32px oklch(0.82 0.22 130 / 35%);
+  }
+
+  /* Button press effect */
+  .btn-press {
+    transition: transform 120ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+  .btn-press:active {
+    transform: scale(0.97);
+  }
+
+  /* Correct answer flash */
+  @keyframes correct-flash {
+    0% { background-color: transparent; }
+    30% { background-color: oklch(0.82 0.22 130 / 20%); }
+    100% { background-color: transparent; }
+  }
+  .answer-correct {
+    animation: correct-flash 300ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  /* Wrong answer shake */
+  @keyframes wrong-shake {
+    0%, 100% { transform: translateX(0); }
+    10%, 50%, 90% { transform: translateX(-6px); }
+    30%, 70% { transform: translateX(6px); }
+  }
+  .answer-wrong {
+    animation: wrong-shake 400ms cubic-bezier(0.36, 0.07, 0.19, 0.97);
+  }
+
+  /* Progress bar fill animation */
+  .progress-fill {
+    transition: width 600ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  /* Stage unlock animation */
+  @keyframes stage-unlock {
+    0% { transform: scale(0.95); opacity: 0; }
+    60% { transform: scale(1.05); opacity: 1; }
+    100% { transform: scale(1); opacity: 1; }
+  }
+  .stage-unlock {
+    animation: stage-unlock 500ms cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  /* Stagger entrance */
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fade-up {
+    animation: fade-up 250ms cubic-bezier(0.23, 1, 0.32, 1) both;
+  }
+
+  /* Lime glow for active elements */
+  .lime-glow {
+    box-shadow: 0 0 0 3px oklch(0.82 0.22 130 / 30%);
+  }
+
+  /* Keyword highlight */
+  .keyword-highlight {
+    background: oklch(0.82 0.22 130 / 15%);
+    color: oklch(0.35 0.15 130);
+    border-radius: 4px;
+    padding: 0 4px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.875em;
+  }
+
+  /* Sidebar icon button */
+  .sidebar-icon-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 150ms ease-out;
+    color: oklch(0.60 0.01 240);
+  }
+  .sidebar-icon-btn:hover {
+    background: oklch(0.18 0.01 240);
+    color: oklch(0.92 0.005 240);
+  }
+  .sidebar-icon-btn.active {
+    background: oklch(0.12 0.01 240);
+    color: oklch(0.92 0.005 240);
+  }
+
+  /* Filter chip */
+  .filter-chip {
+    padding: 4px 14px;
+    border-radius: 9999px;
+    font-size: 0.8125rem;
+    font-weight: 500;
+    background: oklch(0.93 0.005 240);
+    color: oklch(0.40 0.01 240);
+    transition: all 150ms ease-out;
+    border: 1px solid transparent;
+    cursor: pointer;
+  }
+  .filter-chip:hover {
+    background: oklch(0.97 0.005 240);
+    box-shadow: 0 2px 8px oklch(0 0 0 / 8%);
+  }
+  .filter-chip.active {
+    background: white;
+    color: oklch(0.12 0.01 240);
+    font-weight: 700;
+    box-shadow: 0 2px 8px oklch(0 0 0 / 10%);
+  }
+
+  /* XP badge */
+  .xp-badge {
+    background: oklch(0.82 0.22 130);
+    color: oklch(0.12 0.02 130);
+    border-radius: 9999px;
+    padding: 2px 10px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  /* Locked stage overlay */
+  .stage-locked {
+    opacity: 0.45;
+    pointer-events: none;
+    filter: grayscale(0.6);
+  }
+}
