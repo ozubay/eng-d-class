@@ -10,15 +10,14 @@
 
 import { useProgress } from "@/hooks/useProgress";
 import { STAGES } from "@/lib/courseData";
+import { Sidebar } from "@/components/Sidebar";
 import { Link } from "wouter";
 import { motion } from "framer-motion";
 import {
-  BookOpen, Zap, Flame, Trophy, ChevronRight,
-  Lock, CheckCircle2, Star, BarChart3, Target,
-  GraduationCap, Layers, MessageSquare, Sparkles,
-  AlertTriangle, RotateCcw
+  BookOpen, Zap, Flame, ChevronRight,
+  Lock, CheckCircle2, Star, Target,
+  Sparkles, AlertTriangle, RotateCcw
 } from "lucide-react";
-import { Progress } from "@/components/ui/progress";
 
 const STAGE_COLORS: Record<string, { bg: string; text: string; border: string; glow: string }> = {
   lime:   { bg: "bg-[#A8E63D]",   text: "text-[#1a2e00]", border: "border-[#A8E63D]",   glow: "shadow-[0_0_24px_rgba(168,230,61,0.35)]" },
@@ -33,13 +32,6 @@ const STAGE_COLORS: Record<string, { bg: string; text: string; border: string; g
   gold:   { bg: "bg-amber-400",   text: "text-[#1a0e00]",  border: "border-amber-400",   glow: "shadow-[0_0_24px_rgba(251,191,36,0.35)]" },
 };
 
-const NAV_ITEMS = [
-  { icon: <BarChart3 size={18} />, label: "대시보드", active: true },
-  { icon: <Layers size={18} />, label: "스테이지" },
-  { icon: <MessageSquare size={18} />, label: "크리틱 노트" },
-  { icon: <Trophy size={18} />, label: "성취" },
-];
-
 export default function Dashboard() {
   const { progress, getOverallProgress } = useProgress();
   const overall = getOverallProgress();
@@ -50,37 +42,7 @@ export default function Dashboard() {
   return (
     <div className="min-h-screen flex" style={{ background: "oklch(0.968 0.003 240)" }}>
       {/* ── Sidebar ── */}
-      <aside
-        className="w-[64px] flex-shrink-0 flex flex-col items-center py-6 gap-4 sticky top-0 h-screen z-20"
-        style={{ background: "oklch(0.10 0.01 240)" }}
-      >
-        {/* Logo mark */}
-        <div className="w-9 h-9 rounded-xl flex items-center justify-center mb-4"
-          style={{ background: "oklch(0.82 0.22 130)" }}>
-          <GraduationCap size={18} className="text-[#1a2e00]" />
-        </div>
-
-        {NAV_ITEMS.map((item, i) => (
-          <button
-            key={i}
-            className={`sidebar-icon-btn btn-press ${item.active ? "active" : ""}`}
-            title={item.label}
-          >
-            {item.icon}
-          </button>
-        ))}
-
-        <div className="flex-1" />
-
-        {/* XP indicator */}
-        <div className="flex flex-col items-center gap-1">
-          <div className="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold"
-            style={{ background: "oklch(0.82 0.22 130)", color: "#1a2e00" }}>
-            {progress.level}
-          </div>
-          <span className="text-[10px] text-white/40">Lv.</span>
-        </div>
-      </aside>
+      <Sidebar />
 
       {/* ── Main Content ── */}
       <div className="flex-1 flex flex-col min-w-0">

@@ -53,6 +53,14 @@ export function clearStageSession(stageId: number) {
   }
 }
 
+export function clearAllStageSessions() {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // ignore
+  }
+}
+
 // Path segment for a given step (used to route into the resumed page).
 export function stepPath(step: StageStep): string {
   return step; // "flashcard" | "match" | "quiz" map 1:1 to route segments
