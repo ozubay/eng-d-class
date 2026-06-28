@@ -4,6 +4,9 @@ import path from "node:path";
 import { defineConfig } from "vite";
 
 export default defineConfig({
+  // GitHub Pages 프로젝트 사이트는 /eng-d-class/ 하위에서 서빙됨.
+  // 커스텀 도메인(루트)으로 옮길 때는 "/"로 변경.
+  base: "/eng-d-class/",
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
