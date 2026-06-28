@@ -7,13 +7,13 @@
 import { useParams, Link } from "wouter";
 import { STAGES, QUIZ_TYPES, getQuizTypeLabel, getQuizTypeIcon } from "@/lib/courseData";
 import { useProgress } from "@/hooks/useProgress";
+import { getStageSession, clearStageSession, stepLabel } from "@/lib/stageSession";
 import { motion } from "framer-motion";
 import {
-  ArrowLeft, BookOpen, ChevronRight, CheckCircle2,
-  Lock, Zap, Target, PlayCircle
+  ArrowLeft, BookOpen, CheckCircle2,
+  Lock, Zap, Target, PlayCircle, RotateCcw
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
 
 export default function StagePage() {
   const params = useParams<{ stageId: string }>();
@@ -21,6 +21,7 @@ export default function StagePage() {
   const stage = STAGES.find(s => s.id === stageId);
   const { progress } = useProgress();
   const sp = progress.stages[stageId];
+  const session = getStageSession(stageId);
 
   if (!stage) {
     return (
@@ -248,18 +249,38 @@ export default function StagePage() {
           transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1], delay: 0.2 }}
           className="flex flex-col gap-3"
         >
+          {/* Resume CTA — 중단했던 단계에서 이어서 */}
+          {session && (
+            <Link href={`/stage/${stageId}/${session.step}`} className="flex-1">
+              <button
+                className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-base btn-press transition-all duration-200"
+                style={{
+                  background: "oklch(0.82 0.22 130)",
+                  color: "#1a2e00",
+                  boxShadow: "0 8px 24px oklch(0.82 0.22 130 / 30%)"
+                }}
+              >
+                <PlayCircle size={20} />
+                이어서 하기 · {stepLabel(session.step)}
+                <Zap size={16} />
+              </button>
+            </Link>
+          )}
           <Link href={`/stage/${stageId}/flashcard`} className="flex-1">
             <button
-              className="w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-base btn-press transition-all duration-200"
-              style={{
+              onClick={() => clearStageSession(stageId)}
+              className={`w-full flex items-center justify-center gap-2 py-4 rounded-2xl font-bold text-base btn-press transition-all duration-200 ${
+                session ? "border border-border bg-card text-foreground" : ""
+              }`}
+              style={session ? undefined : {
                 background: "oklch(0.82 0.22 130)",
                 color: "#1a2e00",
                 boxShadow: "0 8px 24px oklch(0.82 0.22 130 / 30%)"
               }}
             >
-              <PlayCircle size={20} />
-              {sp?.completed ? "다시 학습하기" : "Step 1 · 암기 시작"}
-              <Zap size={16} />
+              {session ? <RotateCcw size={18} /> : <PlayCircle size={20} />}
+              {session ? "처음부터 다시" : sp?.completed ? "다시 학습하기" : "Step 1 · 암기 시작"}
+              {!session && <Zap size={16} />}
             </button>
           </Link>
           {sp?.completed && (

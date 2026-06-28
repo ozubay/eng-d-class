@@ -13,6 +13,7 @@ import {
   QuizQuestion,
   CheckResult
 } from "@/lib/quizEngine";
+import { getStageSession, setStageSession, clearStageSession } from "@/lib/stageSession";
 import { useProgress } from "@/hooks/useProgress";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -40,7 +41,10 @@ export default function QuizPage() {
     return generateQuizSession(stage.sentences, 3);
   });
 
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(() => {
+    const s = getStageSession(stageId);
+    return s?.step === "quiz" && s.index < (stage?.sentences.length ?? 0) * 3 ? s.index : 0;
+  });
   const [lives, setLives] = useState(TOTAL_LIVES);
   const [score, setScore] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
@@ -89,11 +93,15 @@ export default function QuizPage() {
   const handleNext = useCallback(() => {
     if (currentIndex + 1 >= totalQuestions) {
       setQuizState('complete');
+      // Mission complete → clear resume state
+      clearStageSession(stageId);
     } else {
-      setCurrentIndex(prev => prev + 1);
+      const next = currentIndex + 1;
+      setCurrentIndex(next);
       setQuizState('question');
+      setStageSession(stageId, 'quiz', next);
     }
-  }, [currentIndex, totalQuestions]);
+  }, [currentIndex, totalQuestions, stageId]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -215,6 +223,7 @@ export default function QuizPage() {
                 setCorrectCount(0);
                 setXpGained(0);
                 setQuizState('question');
+                setStageSession(stageId, 'quiz', 0);
               }}
               className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl font-semibold text-sm btn-press"
               style={{ background: "oklch(0.82 0.22 130)", color: "#1a2e00" }}
@@ -237,8 +246,13 @@ export default function QuizPage() {
       >
         <div className="max-w-2xl mx-auto flex items-center gap-4">
           <Link href={`/stage/${stageId}`}>
-            <button className="text-white/60 hover:text-white transition-colors btn-press">
+            <button className="text-white/60 hover:text-white transition-colors btn-press" title="스테이지로">
               <ArrowLeft size={18} />
+            </button>
+          </Link>
+          <Link href="/">
+            <button className="text-white/60 hover:text-white transition-colors btn-press" title="홈으로">
+              <Home size={17} />
             </button>
           </Link>
 

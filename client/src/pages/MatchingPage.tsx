@@ -8,10 +8,11 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useParams, useLocation } from "wouter";
-import { STAGES, Sentence } from "@/lib/courseData";
+import { STAGES } from "@/lib/courseData";
+import { getStageSession, setStageSession } from "@/lib/stageSession";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  ArrowLeft, ChevronRight, Timer, Zap, CheckCircle2, XCircle, Trophy
+  ArrowLeft, ChevronRight, Timer, Zap, CheckCircle2, XCircle, Trophy, Home
 } from "lucide-react";
 import { Link } from "wouter";
 
@@ -135,9 +136,12 @@ export default function MatchingPage() {
     setPhase('playing');
   }, [stage]);
 
-  // Init
+  // Init — resume from saved batch if this stage was interrupted in matching
   useEffect(() => {
-    buildBatch(0, 'student');
+    const s = getStageSession(stageId);
+    const start = s?.step === 'match' && s.index < totalBatches ? s.index : 0;
+    setBatchIndex(start);
+    buildBatch(start, 'student');
   }, []);
 
   // Timer
@@ -232,10 +236,14 @@ export default function MatchingPage() {
         setPhase('all-done');
         setTotalTime(t => t + elapsed);
         setTotalWrong(w => w + wrongPairs);
+        // Step 2 done → next time resume at Step 3 (quiz)
+        setStageSession(stageId, 'quiz', 0);
       } else {
         setBatchIndex(nextBatch);
         setMatchMode('student');
         buildBatch(nextBatch, 'student');
+        // Persist resume position at the new batch
+        setStageSession(stageId, 'match', nextBatch);
       }
     }
   };
@@ -303,10 +311,18 @@ export default function MatchingPage() {
                 setTotalTime(0);
                 setTotalWrong(0);
                 buildBatch(0, 'student');
+                setStageSession(stageId, 'match', 0);
               }}
               className="w-full py-3 rounded-2xl font-medium text-sm border border-border bg-card text-foreground btn-press"
             >
               다시 도전하기
+            </button>
+            <button
+              onClick={() => navigate("/")}
+              className="w-full py-3 rounded-2xl font-medium text-sm text-muted-foreground btn-press flex items-center justify-center gap-1.5"
+            >
+              <Home size={14} />
+              홈으로 돌아가기
             </button>
           </div>
         </motion.div>
@@ -323,8 +339,13 @@ export default function MatchingPage() {
       >
         <div className="max-w-3xl mx-auto flex items-center gap-4">
           <Link href={`/stage/${stageId}/flashcard`}>
-            <button className="text-white/60 hover:text-white transition-colors btn-press">
+            <button className="text-white/60 hover:text-white transition-colors btn-press" title="암기로">
               <ArrowLeft size={18} />
+            </button>
+          </Link>
+          <Link href="/">
+            <button className="text-white/60 hover:text-white transition-colors btn-press" title="홈으로">
+              <Home size={17} />
             </button>
           </Link>
 

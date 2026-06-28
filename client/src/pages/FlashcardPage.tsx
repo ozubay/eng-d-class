@@ -10,12 +10,12 @@
 import { useState, useCallback } from "react";
 import { useParams, useLocation } from "wouter";
 import { STAGES } from "@/lib/courseData";
+import { getStageSession, setStageSession } from "@/lib/stageSession";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   ArrowLeft, ChevronRight, RotateCcw, CheckCircle2,
-  BookOpen, Zap, Eye, EyeOff
+  BookOpen, Zap, Eye, EyeOff, Home
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { Link } from "wouter";
 
 export default function FlashcardPage() {
@@ -24,7 +24,11 @@ export default function FlashcardPage() {
   const stage = STAGES.find(s => s.id === stageId);
   const [, navigate] = useLocation();
 
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(() => {
+    const s = getStageSession(stageId);
+    const total = stage?.sentences.length ?? 0;
+    return s?.step === "flashcard" && s.index < total ? s.index : 0;
+  });
   const [isFlipped, setIsFlipped] = useState(false);
   const [knownIds, setKnownIds] = useState<Set<number>>(new Set());
   const [reviewIds, setReviewIds] = useState<Set<number>>(new Set());
@@ -67,7 +71,6 @@ export default function FlashcardPage() {
     if (currentIndex + 1 >= total) {
       // End of current deck
       if (phase === 'study') {
-        const reviewCount = reviewIds.size + (currentSentence && !knownIds.has(currentSentence.id) ? 0 : 0);
         // Check if there are cards to review
         setTimeout(() => {
           const finalReviewIds = new Set(Array.from(reviewIds));
@@ -76,13 +79,19 @@ export default function FlashcardPage() {
             setCurrentIndex(0);
           } else {
             setPhase('done');
+            // Step 1 done → next time resume at Step 2 (matching)
+            setStageSession(stageId, 'match', 0);
           }
         }, 50);
       } else {
         setPhase('done');
+        setStageSession(stageId, 'match', 0);
       }
     } else {
-      setCurrentIndex(i => i + 1);
+      const next = currentIndex + 1;
+      setCurrentIndex(next);
+      // Persist resume position (only meaningful in the study deck)
+      if (phase === 'study') setStageSession(stageId, 'flashcard', next);
     }
   };
 
@@ -139,11 +148,19 @@ export default function FlashcardPage() {
                 setKnownIds(new Set());
                 setReviewIds(new Set());
                 setPhase('study');
+                setStageSession(stageId, 'flashcard', 0);
               }}
               className="w-full py-3 rounded-2xl font-medium text-sm border border-border bg-card text-foreground btn-press"
             >
               <RotateCcw size={14} className="inline mr-1.5" />
               처음부터 다시 암기
+            </button>
+            <button
+              onClick={() => navigate("/")}
+              className="w-full py-3 rounded-2xl font-medium text-sm text-muted-foreground btn-press flex items-center justify-center gap-1.5"
+            >
+              <Home size={14} />
+              홈으로 돌아가기
             </button>
           </div>
         </motion.div>
@@ -162,8 +179,13 @@ export default function FlashcardPage() {
       >
         <div className="max-w-2xl mx-auto flex items-center gap-4">
           <Link href={`/stage/${stageId}`}>
-            <button className="text-white/60 hover:text-white transition-colors btn-press">
+            <button className="text-white/60 hover:text-white transition-colors btn-press" title="스테이지로">
               <ArrowLeft size={18} />
+            </button>
+          </Link>
+          <Link href="/">
+            <button className="text-white/60 hover:text-white transition-colors btn-press" title="홈으로">
+              <Home size={17} />
             </button>
           </Link>
 
